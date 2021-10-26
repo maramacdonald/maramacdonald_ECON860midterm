@@ -32,8 +32,6 @@ for rows in range(len(userList)):
 
 		gitid=ghdata['id']
 		print(gitid)
-		#avatar=ghdata['avatar']
-		#print('avatar')
 		url=ghdata['url']
 		print(url)
 		followers=ghdata['followers']
@@ -42,9 +40,6 @@ for rows in range(len(userList)):
 		print(following)
 		repos=ghdata['public_repos']
 		print(repos)
-		#for repo in repos:
-			#stars = repo.stargazers_count
-			#	print(stars)
 		name=ghdata['name']
 		print(name)
 		company=ghdata['company']
@@ -67,7 +62,6 @@ for rows in range(len(userList)):
 
 		df=df.append({
 			'ID': gitid,
-			#'Avatar URL': avatar,
 			'URL': url,
 			'Follower Count': followers,
 			'Following Count': following,

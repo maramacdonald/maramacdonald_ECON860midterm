@@ -1,0 +1,203 @@
+
+#in terminal: setting up a project folder 
+—>cd Desktop
+—>cd ECON860
+—>mkdir gituser_scraper 
+—>cd gituser_scraper 
+
+**gituser_request part
+
+—>touch gituser_request.py
+#this file ….
+
+#in sublime
+import urllib.request
+import os
+#making a folder for the webpage html
+If not os.path.exists(“html_files”):
+	os.mkdir(“html_files”)
+—> python3 gituser_request.py 
+
+#reading the webpage’s html into the folder we made
+f = open("html_files/gitusers" + ".html", "wb")
+response = urllib.request.urlopen("http://45.79.253.243/index.html/")
+html = response.read()
+f.write(html)
+f.close()
+
+—>python3 gituser_request.py 
+#now the webpage html can be found in the html_files folder in gituser
+
+**gituser_parser part
+#in terminal
+--> touch gituser_parser.py
+
+#in sublime
+from bs4 import BeautifulSoup
+import os
+import pandas 
+
+#df is the data frame we will store our list of names in
+df = pandas.DataFrame()
+
+#making folder for username list
+if not os.path.exists("parsed_files"):
+	os.mkdir("parsed_files")
+—>python3 gituser_parser.py
+
+
+#making a soup  of the html
+file_name = "html_files/gitusers.html"
+f = open(file_name, "r")
+soup = BeautifulSoup(f.read(), "html.parser")
+f.close()
+—>python3 gituser_parser.py
+
+#soup2 is a list of all the div rows in the soup
+soup2 = soup.find_all("div”)
+—>python3 gituser_parser.py
+
+#run a for loop for all the rows in div to store the ghids
+for divs in range(len(soup2)):
+	#excludes the first 3 rows w/o ghid tag
+	if divs > 3:
+		#gitname stores ghid from current row in div
+		gitname = soup2[divs]["ghid"]
+		#we add gitname to our data frame
+		df = df.append({'ghid': gitname}, ignore_index = True)
+—>python3 gituser_parser.py
+
+#this line drops duplicate usernames
+df.drop_duplicates(subset="ghid", keep='first', inplace=True)
+—>python3 gituser_parser.py
+
+df.to_csv("parsed_files/gitusersdata.csv", index=False)
+—>python3 gituser_parser.py
+#now cleaned list of ghids can be found in the csv file gitusersdata
+
+##in terminal
+1. Set up git repository
+    --> git init
+    --> git status
+2. Go to GitHub and make a new repository
+	maramacdonald_ECON860midterm
+3. Linking my local repository to the my repo 
+    --> git remote add origin git@github.com:maramacdonald/ECON860midterm.git
+4. adding the gituser_request.py and gituser_parser.py programs to my github repository
+	--> git add .
+	--> git status
+5. commit to my git repository
+	-->git commit -m"init"
+6. uploud to github
+	-->git push origin master
+
+
+
+#create new file in terminal
+--> touch ghinfo.py
+
+import json
+import requests
+import pandas
+import csv
+#df is the data frame we will use to create our csv and store github user info
+df = pandas.DataFrame()
+
+##copy and paste github personal access token into new sublime file named 'token1'
+#saving my GitHub personal access token to a variable
+f = open("token1", "r")
+token1 = f.read()
+f.close()
+—>python3 ghinfo.py 
+
+##copy and paste github userneame into new sublime file named 'username'
+##saving my GitHub username to a variable
+f = open("username", "r")
+username = f.read()
+f.close()
+—>python3 ghinfo.py 
+
+#create .gitignore file in sublime and add 'token1' into it 
+	## this will make sure our personal access token isn't uploaded onto github 
+
+github_session = requests.Session()
+github_session.auth = (username, token1)
+
+
+#importing our list of usernames
+userList = list(csv.reader(open("parsed_files/gitusersdata.csv")))
+
+
+access_point = "https://api.github.com"
+
+for rows in range(len(userList)):
+	if rows > 0:
+		idString = userList[rows][0]
+		user_url = access_point + "/users/"+ idString
+		ghdata = json.loads(github_session.get(user_url).text)
+		print(ghdata)
+#look at ghdata in terminal
+—>python3 ghinfo.py 
+		gitid=ghdata['id']
+		print(gitid)
+		url=ghdata['url']
+		print(url)
+		followers=ghdata['followers']
+		print(followers)
+		following=ghdata['following']
+		print(following)
+		repos=ghdata['public_repos']
+		print(repos)
+		name=ghdata['name']
+		print(name)
+		company=ghdata['company']
+		print(company)
+		blog=ghdata['blog']
+		print(blog)
+		location=ghdata['location']
+		print(location)
+		email=ghdata['email']
+		print(email)
+		hireable=ghdata['hireable']
+		print(hireable)
+		created_at=ghdata['created_at']
+		print(created_at)
+		updated_at=ghdata['updated_at']
+		print(updated_at)
+		bio=ghdata['bio']
+		print(bio)
+
+
+		df=df.append({
+			'ID': gitid,
+			#'Avatar URL': avatar,	'URL': url,
+			'Follower Count': followers,
+			'Following Count': following,
+			'Reposts': repos,
+			'Name': name,
+			'Company': company,
+			'Blog': blog,
+			'Location': location,
+			'Email': email,
+			'Hired Time': hireable,
+			'Created At': created_at,
+			'Last Update': updated_at,
+			'Bio': bio,
+			}, ignore_index = True)
+#downloading the info we want to know from the data we accessed
+—>python3 ghinfo.py 
+
+
+df.to_csv("parsed_files/ghinfo.csv", index=False)
+—>python3 ghinfo.py 
+#now table of info about the list of users can be found in the csv file ghinfo.csv
+
+##in terminal
+1. adding the ghinfo.py program to my github repository
+	--> git add .
+	--> git status
+2. commit to my git repository
+	-->git commit -m"init"
+3. upload to github
+	-->git push origin master
+
